@@ -1,0 +1,8 @@
+pandas
+requests
+supabase
+python-dotenv
+geopy
+tqdm
+numpy
+openpyxl

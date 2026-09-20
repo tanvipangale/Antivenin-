@@ -1,0 +1,135 @@
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --color-cream: #F7F3EA;
+  --color-surface: #FDFBF6;
+  --color-ink: #2B2A22;
+  --color-olive: #6E6B47;
+  --color-olive-dark: #5A5739;
+  --color-clay: #B9743F;
+  --color-sand: #C6C293;
+  --color-warning-bg: #F9D9D3;
+  --color-warning-text: #8A3B2B;
+  --color-select: #3E7CB1;
+
+  --font-serif: 'Fraunces', serif;
+  --font-sans: 'Inter', sans-serif;
+
+  --radius-card: 14px;
+}
+
+html, body, #root {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  min-height: 100%;
+}
+
+body {
+  background: var(--color-cream);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4 {
+  font-family: var(--font-serif);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+/* ---------- Animations ---------- */
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(18px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes gentlePulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50%      { transform: scale(1.12); opacity: 0.75; }
+}
+
+@keyframes pinDrop {
+  0%   { transform: translateY(-10px); opacity: 0; }
+  60%  { transform: translateY(2px); opacity: 1; }
+  100% { transform: translateY(0); opacity: 1; }
+}
+
+.reveal {
+  opacity: 0;
+  transform: translateY(18px);
+}
+.reveal.in-view {
+  animation: fadeInUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.page-fade {
+  animation: fadeIn 0.35s ease-out;
+}
+
+.card-lift {
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease;
+}
+.card-lift:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 24px -12px rgba(43, 42, 34, 0.18);
+}
+
+.btn-press {
+  transition: transform 0.15s ease, box-shadow 0.15s ease, background-color 0.2s ease;
+}
+.btn-press:active {
+  transform: scale(0.96);
+}
+
+.locate-pulse {
+  animation: gentlePulse 2.2s ease-in-out infinite;
+}
+
+.pin-drop {
+  animation: pinDrop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal, .reveal.in-view, .page-fade, .card-lift, .btn-press, .locate-pulse, .pin-drop {
+    animation: none !important;
+    transition: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
+
+@media print {
+  header, .print\:hidden {
+    display: none !important;
+  }
+  body, .bg-cream {
+    background: white !important;
+  }
+  a {
+    color: black !important;
+    text-decoration: none !important;
+  }
+}
+
+@keyframes cardPop {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.card-pop {
+  animation: cardPop 0.4s ease-out both;
+}
