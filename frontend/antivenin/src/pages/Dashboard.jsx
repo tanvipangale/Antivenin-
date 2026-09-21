@@ -1,11 +1,12 @@
 import { useEffect, useState, useCallback } from 'react';
+import { Navigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
 import RegistrationTimeline from '../components/Registrationtimeline';
 import { COMMON_ANTIVENOMS } from '../data/AntivenomTypes';
 
 export default function Dashboard() {
-  const { user, logout } = useAuth();
+  const { user, isAdmin, logout } = useAuth();
 
   const [facility, setFacility] = useState(null);
   const [stock, setStock] = useState([]);
@@ -97,6 +98,13 @@ export default function Dashboard() {
 
   if (loading) {
     return <p className="mx-auto max-w-3xl px-6 py-16 text-center text-ink/60">Loading…</p>;
+  }
+
+  // Admin accounts aren't linked to any hospital, so send them to their
+  // own panel instead of showing the "application pending" screen meant
+  // for staff waiting on approval.
+  if (isAdmin && !facility) {
+    return <Navigate to="/admin" replace />;
   }
 
   // Account exists but hasn't been linked to a hospital record yet — an

@@ -12,7 +12,7 @@ const navLinks = [
 ];
 
 export default function Header() {
-  const { session, hospital, loading, logout } = useAuth();
+  const { session, hospital, isAdmin, loading, logout } = useAuth();
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
@@ -45,9 +45,16 @@ export default function Header() {
             <div className="h-8 w-20 animate-pulse rounded-full bg-ink/10" />
           ) : session ? (
             <>
-              <Link to="/dashboard" className="text-sm font-semibold text-ink hover:text-olive">
-                {hospital?.hospital_name || 'Dashboard'}
-              </Link>
+              {isAdmin && (
+                <Link to="/admin" className="text-sm font-semibold text-ink hover:text-olive">
+                  Admin
+                </Link>
+              )}
+              {(hospital || !isAdmin) && (
+                <Link to="/dashboard" className="text-sm font-semibold text-ink hover:text-olive">
+                  {hospital?.hospital_name || 'Dashboard'}
+                </Link>
+              )}
               <button onClick={logout} className="text-sm font-semibold text-ink/70 hover:text-olive">
                 Log out
               </button>

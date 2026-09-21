@@ -6,6 +6,7 @@ const AuthContext = createContext(null);
 export function AuthProvider({ children }) {
   const [session, setSession] = useState(null);
   const [hospital, setHospital] = useState(null);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
 
   async function loadHospital(userId) {
@@ -22,6 +23,20 @@ export function AuthProvider({ children }) {
     }
   }
 
+  async function loadAdminStatus(userId) {
+    try {
+      const { data, error } = await supabase.from('admins').select('user_id').eq('user_id', userId).maybeSingle();
+      if (error) {
+        console.error('Could not check admin status:', error);
+        return setIsAdmin(false);
+      }
+      setIsAdmin(!!data);
+    } catch (error) {
+      console.error('Admin check failed:', error);
+      setIsAdmin(false);
+    }
+  }
+
   useEffect(() => {
     let mounted = true;
 
@@ -29,7 +44,9 @@ export function AuthProvider({ children }) {
       const { data: { session } } = await supabase.auth.getSession();
       if (!mounted) return;
       setSession(session);
-      if (session?.user) await loadHospital(session.user.id);
+      if (session?.user) {
+        await Promise.all([loadHospital(session.user.id), loadAdminStatus(session.user.id)]);
+      }
       setLoading(false);
     }
     loadSession();
@@ -38,8 +55,12 @@ export function AuthProvider({ children }) {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, newSession) => {
       if (!mounted) return;
       setSession(newSession);
-      if (newSession?.user) await loadHospital(newSession.user.id);
-      else setHospital(null);
+      if (newSession?.user) {
+        await Promise.all([loadHospital(newSession.user.id), loadAdminStatus(newSession.user.id)]);
+      } else {
+        setHospital(null);
+        setIsAdmin(false);
+      }
       setLoading(false);
     });
 
@@ -51,19 +72,22 @@ export function AuthProvider({ children }) {
     if (error) return { ok: false, error: error.message };
 
     setSession(data.session);
-    if (data.user) await loadHospital(data.user.id);
+    if (data.user) {
+      await Promise.all([loadHospital(data.user.id), loadAdminStatus(data.user.id)]);
+    }
     return { ok: true };
   }, []);
 
   const logout = useCallback(async () => {
     setSession(null);
     setHospital(null);
+    setIsAdmin(false);
     const { error } = await supabase.auth.signOut();
     if (error) console.error('Logout failed:', error);
   }, []);
 
   return (
-    <AuthContext.Provider value={{ session, user: session?.user ?? null, hospital, loading, login, logout }}>
+    <AuthContext.Provider value={{ session, user: session?.user ?? null, hospital, isAdmin, loading, login, logout }}>
       {children}
     </AuthContext.Provider>
   );
