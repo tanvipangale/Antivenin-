@@ -1,13 +1,3 @@
-// Identification-level reference only — not treatment or dosing guidance.
-// Helps someone recognize which antivenom name to look for on the Stock
-// page based on what bit or stung them; actual treatment decisions
-// (which vials, how many, how administered) are always made by hospital
-// staff, never by this app.
-//
-// `wikiTitle` is the English Wikipedia article title used to fetch a real
-// species photo live (see src/utils/wikiImage.js) — not a hardcoded image
-// URL, so it can't go stale.
-
 export const antivenomInfo = [
   {
     id: 'polyvalent',
