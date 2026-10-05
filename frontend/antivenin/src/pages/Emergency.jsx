@@ -58,7 +58,7 @@ export default function Emergency() {
 
             <a
               href="tel:112"
-              className="btn-press inline-flex items-center gap-2 rounded-full bg-olive px-7 py-4 font-semibold text-cream transition hover:opacity-90"
+              className="btn-press inline-flex items-center gap-2 rounded-full bg-olive px-7 py-2 font-semibold text-cream transition hover:opacity-90"
             >
               <PhoneIcon className="h-5 w-5" />
               Call Emergency Services
@@ -66,7 +66,7 @@ export default function Emergency() {
 
             <a
               href="tel:108"
-              className="btn-press inline-flex items-center gap-2 rounded-full bg-clay px-7 py-4 font-semibold text-cream transition hover:opacity-90"
+              className="btn-press inline-flex items-center gap-2 rounded-full bg-clay px-7 py-2 font-semibold text-cream transition hover:opacity-90"
             >
               <PhoneIcon className="h-5 w-5" />
               Call Ambulance (108)
