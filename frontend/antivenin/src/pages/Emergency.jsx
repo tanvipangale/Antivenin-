@@ -207,11 +207,13 @@ export default function Emergency() {
                   </span>
                 </div>
 
-                <div className="grid grid-cols-2 gap-3 p-4 auto-rows-fr">
-                  {item.covers.map(species => (
-                    <SpeciesCard key={species.name} species={species} caption="Venomous species" />
-                  ))}
-                </div>
+                {item.covers.length > 0 && (
+                  <div className="grid grid-cols-2 gap-3 p-4 auto-rows-fr">
+                    {item.covers.map(species => (
+                      <SpeciesCard key={species.name} species={species} caption="Venomous species" />
+                    ))}
+                  </div>
+                )}
 
                 <div className="mt-auto border-t border-ink/10 px-5 py-4">
                   <p className="text-xs leading-5 text-ink/55">{item.details}</p>

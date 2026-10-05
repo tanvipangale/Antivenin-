@@ -33,6 +33,19 @@ export const antivenomInfo = [
     administration: 'IV infusion, hospital staff only — never self-administered',
     shelfLife: 'Typically 2–3 years unopened, cold-stored',
   },
+  {
+    id: 'monovalent',
+    name: 'Monovalent antivenom',
+    aliases: ['Monovalent Anti-Snake Venom', 'Monovalent ASV', 'Monovalent Anti-Venom'],
+    forWhat: 'Snakebites (single species)',
+    covers: [],
+    details:
+      'Made against the venom of one specific snake species, so it only works when the biting snake is known. Most Indian hospitals stock the polyvalent Big Four antivenom instead, so availability of monovalent varies. Do not delay going to a hospital to identify the snake.',
+    manufacturers: ['Varies by product, check with the hospital'],
+    storage: 'Depends on the product, check the label (liquid forms need 2–8°C)',
+    administration: 'IV infusion, hospital staff only — never self-administered',
+    shelfLife: 'Depends on the product, check the label',
+  },
 ];
 
 export const antivenomGaps = [

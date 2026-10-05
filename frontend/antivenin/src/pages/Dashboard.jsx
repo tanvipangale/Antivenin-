@@ -13,6 +13,7 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [newType, setNewType] = useState({ name: '', quantity: '' });
+  const [stockError, setStockError] = useState('');
 
   const loadData = useCallback(async () => {
     const { data: facilityRow, error: facilityError } = await supabase
@@ -60,8 +61,10 @@ export default function Dashboard() {
 
     if (error) {
       console.error('[Antivenin] Failed to update stock:', error);
+      setStockError('Could not update stock: ' + error.message);
       return;
     }
+    setStockError('');
 
     setStock((prev) => prev.map((item) => (item.id === id ? { ...item, quantity: q } : item)));
   }
@@ -89,8 +92,10 @@ export default function Dashboard() {
 
     if (error) {
       console.error('[Antivenin] Failed to add stock type:', error);
+      setStockError('Could not add antivenom type: ' + error.message);
       return;
     }
+    setStockError('');
 
     setStock((prev) => [...prev, data]);
     setNewType({ name: '', quantity: '' });
@@ -142,6 +147,10 @@ export default function Dashboard() {
           </button>
         </div>
       </div>
+
+      {stockError && (
+        <p className="mb-4 rounded-[14px] border border-clay/40 bg-clay/10 p-4 text-sm text-clay">{stockError}</p>
+      )}
 
       <div className="mb-8 space-y-4">
         {stock.map((item) => (
