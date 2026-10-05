@@ -82,17 +82,36 @@ async function fetchRawRows(lat, lng, radiusMeters) {
   const latDelta = radiusKm / 111;
   const lngDelta = radiusKm / (111 * Math.cos((lat * Math.PI) / 180));
 
-  const { data, error } = await supabase
-    .from('healthcare_facilities')
-    .select(`
-      id, source_id, name, facility_type, category, medicine_system, address,
-      state, district, subdistrict, town, village, pincode, latitude, longitude,
-      phone, mobile, emergency_phone, ambulance_phone, email, website,
-      specialties, facilities, accreditation, total_beds, emergency_services, source,
-      hospital_stock ( id, name, quantity, updated_at )
-    `)
-    .gte('latitude', lat - latDelta).lte('latitude', lat + latDelta)
-    .gte('longitude', lng - lngDelta).lte('longitude', lng + lngDelta);
+  // Supabase returns at most 1000 rows per request. In a dense city the
+  // search box holds more than that, and without a fixed order the
+  // "first 1000" can change between searches. So we fetch in pages with
+  // a stable order until every row in the box has been loaded.
+  const PAGE_SIZE = 1000;
+  const MAX_PAGES = 10;
+  let data = [];
+  let error = null;
+  for (let page = 0; page < MAX_PAGES; page += 1) {
+    const from = page * PAGE_SIZE;
+    const res = await supabase
+      .from('healthcare_facilities')
+      .select(`
+        id, source_id, name, facility_type, category, medicine_system, address,
+        state, district, subdistrict, town, village, pincode, latitude, longitude,
+        phone, mobile, emergency_phone, ambulance_phone, email, website,
+        specialties, facilities, accreditation, total_beds, emergency_services, source
+      `)
+      .gte('latitude', lat - latDelta).lte('latitude', lat + latDelta)
+      .gte('longitude', lng - lngDelta).lte('longitude', lng + lngDelta)
+      .order('id', { ascending: true })
+      .range(from, from + PAGE_SIZE - 1);
+
+    if (res.error) {
+      error = res.error;
+      break;
+    }
+    data = data.concat(res.data || []);
+    if (!res.data || res.data.length < PAGE_SIZE) break;
+  }
 
   if (error) {
     console.error('[Antivenin] Supabase facility search failed:', error);
@@ -104,8 +123,36 @@ async function fetchRawRows(lat, lng, radiusMeters) {
   return rows;
 }
 
+// Stock is fetched fresh on every search (never cached) so a hospital that
+// just updated its stock shows up straight away. Only facility rows are cached.
+async function fetchStockByFacility() {
+  const PAGE_SIZE = 1000;
+  const byFacility = new Map();
+  for (let page = 0; page < 10; page += 1) {
+    const from = page * PAGE_SIZE;
+    const { data, error } = await supabase
+      .from('hospital_stock')
+      .select('id, facility_id, name, quantity, updated_at')
+      .order('id', { ascending: true })
+      .range(from, from + PAGE_SIZE - 1);
+    if (error) {
+      console.error('[Antivenin] Failed to load stock:', error);
+      break;
+    }
+    for (const row of data || []) {
+      if (!byFacility.has(row.facility_id)) byFacility.set(row.facility_id, []);
+      byFacility.get(row.facility_id).push(row);
+    }
+    if (!data || data.length < PAGE_SIZE) break;
+  }
+  return byFacility;
+}
+
 async function fetchDatabaseFacilities(lat, lng, radiusMeters = DEFAULT_RADIUS_METERS) {
-  const rows = await fetchRawRows(lat, lng, radiusMeters);
+  const [rows, stockByFacility] = await Promise.all([
+    fetchRawRows(lat, lng, radiusMeters),
+    fetchStockByFacility(),
+  ]);
   const radiusKm = radiusMeters / 1000;
 
   return rows
@@ -131,7 +178,7 @@ async function fetchDatabaseFacilities(lat, lng, radiusMeters = DEFAULT_RADIUS_M
         verified: h.source !== 'OpenStreetMap', // Government/ABDM-sourced = verified; community-mapped = not
         // Real reported stock from hospital_stock, joined above.
         // No rows -> null, same as "not yet reported".
-        stock: h.hospital_stock?.length ? h.hospital_stock : null,
+        stock: stockByFacility.get(h.id)?.length ? stockByFacility.get(h.id) : null,
         distanceKm,
         facilityType: h.facility_type,
         category: h.category,

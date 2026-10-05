@@ -10,11 +10,6 @@ function levelColor(totalQty) {
   return { text: 'text-olive', label: 'Available', badge: 'bg-olive/15 text-olive' };
 }
 
-/**
- * Aggregates antivenom quantities across every facility currently on
- * screen (the ones with hasAnyStock) into one number per antivenom typ
- * a "lab inventory board" view of what's available in the searched area.
- */
 export default function AntivenomLabPanel({ facilities }) {
   const totals = antivenomInfo.map((info) => {
     const acceptedNames = [info.name, ...(info.aliases || [])].map((n) => n.trim().toLowerCase());

@@ -155,7 +155,7 @@ export default function MapSearch() {
   // Top 3 hospitals specifically (not clinics/pharmacies) — confirmed stock
   // first, then closest. This is a ranking on top of the full list below,
   // not a replacement for it.
-  const topHospitals = [...facilities].filter((f) => f.type === 'hospital').sort(byStockThenDistance).slice(0, 3);
+  const topHospitals = [...facilities].filter((f) => f.type === 'hospital' || hasAnyStock(f)).sort(byStockThenDistance).slice(0, 3);
   const topHospitalIds = new Set(topHospitals.map((h) => h.id));
 
   const activeSections =
@@ -240,7 +240,7 @@ export default function MapSearch() {
                   <div className="mb-10">
                     <h2 className="mb-1 flex items-center gap-1.5 text-lg font-semibold text-ink">
                       <StarIcon className="h-4 w-4 text-select" />
-                      Top 3 hospitals
+                      Top 3 recommended
                     </h2>
                     <p className="mb-4 text-sm text-ink/50">Confirmed antivenom stock first, then distance.</p>
                     {topHospitals.length > 0 ? (
@@ -264,7 +264,7 @@ export default function MapSearch() {
             {activeSections.map((section) => {
               const items = facilities
                 .filter((f) => section.types.includes(f.type))
-                .filter((f) => !(section.key === 'hospitals' && topHospitalIds.has(f.id)));
+                .filter((f) => !topHospitalIds.has(f.id));
               if (items.length === 0) return null;
 
               return (
